@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/rs/zerolog v1.26.0
-	github.com/sirupsen/logrus v1.8.1
 	k8s.io/api v0.23.0
 	k8s.io/apimachinery v0.23.0
 	k8s.io/client-go v0.23.0
