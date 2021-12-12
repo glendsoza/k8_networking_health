@@ -16,10 +16,10 @@ COPY cluster/ ./cluster/
 
 COPY utils ./utils/
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /cluster-health-check
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /knh
 
-# FROM gcr.io/distroless/static
+FROM gcr.io/distroless/static
 
-# COPY --from=base /cluster-health-check /cluster-health-check
+COPY --from=base /knh /knh
 
-ENTRYPOINT [ "/cluster-health-check" ]
+ENTRYPOINT [ "/knh" ]
