@@ -1,2 +1,2 @@
 # k8_networking_health
-Healt check for K8 Networking
+Health check for K8 Networking
