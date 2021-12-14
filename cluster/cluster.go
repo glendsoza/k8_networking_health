@@ -97,7 +97,8 @@ func (c *ClusterMonitor) GetK8PeerMapFromEP(subsets []v1.EndpointSubset) map[str
 	peerMap := make(map[string]string)
 	for _, subset := range subsets {
 		for _, addr := range subset.Addresses {
-			peerMap[strings.Replace(addr.IP, ".", "", -1)] = fmt.Sprintf("%s:%s", addr.IP, os.Getenv("CONTAINER_PORT"))
+			id := fmt.Sprintf("%s@%s", *addr.NodeName, strings.Replace(addr.IP, ".", "", -1))
+			peerMap[id] = fmt.Sprintf("%s:%s", addr.IP, os.Getenv("CONTAINER_PORT"))
 		}
 	}
 	return peerMap
@@ -106,6 +107,7 @@ func (c *ClusterMonitor) GetK8PeerMapFromEP(subsets []v1.EndpointSubset) map[str
 func (c *ClusterMonitor) Monitor() error {
 	addr := os.Getenv("POD_IP")
 	port := os.Getenv("CONTAINER_PORT")
+	id := fmt.Sprintf("%s@%s", os.Getenv("MY_NODE_NAME"), strings.Replace(addr, ".", "", -1))
 	// wait till the endpoints are refreshed
 	log.Info().
 		Str("id", "").
@@ -113,7 +115,7 @@ func (c *ClusterMonitor) Monitor() error {
 		Str("coordinator", "").
 		Str("address", "").
 		Msg("Started waiting for endpoints to refresh")
-	epSubsets, err := c.blockTillEpRefresh(strings.Replace(addr, ".", "", -1))
+	epSubsets, err := c.blockTillEpRefresh(id)
 	if err != nil {
 		log.Warn().
 			Err(err).
@@ -123,7 +125,7 @@ func (c *ClusterMonitor) Monitor() error {
 			Msg("Failed to get refreshed endpoints")
 		return err
 	}
-	b, err := bully.NewBully(strings.Replace(addr, ".", "", -1), fmt.Sprintf("%s:%s", addr, port), "tcp4", epSubsets)
+	b, err := bully.NewBully(id, fmt.Sprintf("%s:%s", addr, port), epSubsets)
 	if err != nil {
 		log.Warn().
 			Str("error", "").
@@ -144,7 +146,7 @@ func (c *ClusterMonitor) Monitor() error {
 					Str("coordinator", b.Coordinator()).
 					Str("address", b.GetAddress()).
 					Msg("Endpoints updated, updating peers")
-				b.Connect("tcp4", c.GetK8PeerMapFromEP(ep.Subsets))
+				b.Connect(c.GetK8PeerMapFromEP(ep.Subsets))
 			}
 		},
 	})

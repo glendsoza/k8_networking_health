@@ -8,9 +8,10 @@ type Peer struct {
 }
 
 type PeerInfo struct {
-	ID    string `json:"id"`
-	Addr  string `json:"address"`
-	Alive bool   `json:"alive"`
+	ID       string `json:"id"`
+	Addr     string `json:"address"`
+	Alive    bool   `json:"alive"`
+	NodeName string `json:"node_name"`
 }
 
 // NewPeer returns a new `*bully.Peer`.

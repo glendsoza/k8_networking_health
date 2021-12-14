@@ -45,7 +45,7 @@ type Bully struct {
 // NewBully returns a new `Bully` or an `error`.
 //
 // NOTE: All connections to `Peer`s are established during this function.
-func NewBully(ID, addr, proto string, peers map[string]string) (*Bully, error) {
+func NewBully(ID, addr string, peers map[string]string) (*Bully, error) {
 	b := &Bully{
 		ID:           ID,
 		addr:         addr,
@@ -73,7 +73,7 @@ func NewBully(ID, addr, proto string, peers map[string]string) (*Bully, error) {
 				Msg("Failed to Listen")
 		}
 	}()
-	b.Connect(proto, peers)
+	b.Connect(peers)
 	return b, nil
 }
 
@@ -82,7 +82,7 @@ func (b *Bully) GetAddress() string {
 }
 
 // Connect performs a connection to the remote `Peer`s.
-func (b *Bully) Connect(proto string, peers map[string]string) {
+func (b *Bully) Connect(peers map[string]string) {
 	// Delete the existing peers if they are present
 	b.peers.DeleteAll()
 	for ID, addr := range peers {
@@ -212,7 +212,8 @@ func (b *Bully) MarkDeadAndInform(to, addr string) {
 		// mark the peer as dead
 		b.peers.UpdateStatus(to, false)
 		if peerStatusURL != "" {
-			b.Inform(peerStatusURL, PeerInfo{to, addr, false})
+
+			b.Inform(peerStatusURL, PeerInfo{to, addr, false, strings.Split(to, "@")[0]})
 		}
 	} else {
 		log.Warn().

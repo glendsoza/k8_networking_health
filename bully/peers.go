@@ -1,6 +1,7 @@
 package bully
 
 import (
+	"strings"
 	"sync"
 )
 
@@ -89,7 +90,7 @@ func (pm *PeerMap) PeerData() []PeerInfo {
 	defer pm.mu.RUnlock()
 	var IDSlice []PeerInfo
 	for _, peer := range pm.peers {
-		IDSlice = append(IDSlice, PeerInfo{peer.ID, peer.addr, peer.alive})
+		IDSlice = append(IDSlice, PeerInfo{peer.ID, peer.addr, peer.alive, strings.Split(peer.ID, "@")[0]})
 	}
 	return IDSlice
 }
