@@ -122,7 +122,7 @@ Satus of all the peers will also be posted after each leader election to configu
 {"peer_map":[{"id":"my-node1@103205","address":"10.32.0.5:8080","alive":true,"node_name":"my-node1"}],"coordinator":"my-node0@103209","coordinator_address":"10.32.0.9:8080"}
 ```
 
-## Installation and using it in the K8 Cluster
+## Installation and using it in a K8 Cluster
 
 - Clone the repo
 - Stat to the project root and build the docker image by running `docker build -t knh:v1.0 .`
