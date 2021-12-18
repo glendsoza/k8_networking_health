@@ -68,7 +68,7 @@ spec:
             value: monitoring
           - name: SERVICE_NAME
             value: service-knh          
-          - name: SANITY_CHECK_URLS
+          - name: SANITY_CHECK_URL
             value: "https://www.google.com"
           - name: PEER_STATUS_URL
             value: "http://192.168.1.102:8082"
