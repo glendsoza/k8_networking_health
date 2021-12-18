@@ -107,7 +107,10 @@ func (c *ClusterMonitor) GetK8PeerMapFromEP(subsets []v1.EndpointSubset) map[str
 func (c *ClusterMonitor) Monitor() error {
 	addr := os.Getenv("POD_IP")
 	port := os.Getenv("CONTAINER_PORT")
-	id := fmt.Sprintf("%s@%s", os.Getenv("MY_NODE_NAME"), strings.Replace(addr, ".", "", -1))
+	if port == "" {
+		port = "8080"
+	}
+	id := fmt.Sprintf("%s@%s", os.Getenv("NODE_NAME"), strings.Replace(addr, ".", "", -1))
 	// wait till the endpoints are refreshed
 	log.Info().
 		Str("id", "").

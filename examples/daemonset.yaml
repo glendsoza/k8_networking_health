@@ -1,0 +1,91 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: endpoints-reader-sa
+  namespace: monitoring
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: endpoints-reader-r
+rules:
+- apiGroups: ["*"]
+  resources: ["endpoints"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+# This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
+kind: ClusterRoleBinding
+metadata:
+  name: endpoints-reader-rb
+subjects:
+- kind: ServiceAccount
+  name: endpoints-reader-sa # Name is case sensitive
+  namespace: monitoring
+roleRef:
+  kind: ClusterRole
+  name: endpoints-reader-r
+  apiGroup: rbac.authorization.k8s.io  
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: knh-ds
+  namespace: monitoring
+  labels:
+    app: knh
+spec:
+  selector:
+    matchLabels:
+      app: knh
+  template:
+    metadata:
+      labels:
+        app: knh
+    spec:
+      serviceAccountName: endpoints-reader-sa
+      containers:
+      - name: knh
+        image: knh:v1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName                   
+          - name: CONTAINER_PORT
+            value: "8080"
+          - name: NAMESPACE
+            value: monitoring
+          - name: SERVICE_NAME
+            value: service-knh          
+          - name: SANITY_CHECK_URLS
+            value: "https://www.google.com"
+          - name: PEER_STATUS_URL
+            value: "http://192.168.1.102:8082"
+          - name: CLUSTER_STATUS_URL
+            value: "http://192.168.1.102:8082"
+          - name: LOG_LEVEL
+            value: "trace"            
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: service-knh 
+  namespace: monitoring
+spec:
+  selector:
+    app: knh
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
